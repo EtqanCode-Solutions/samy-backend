@@ -1,17 +1,21 @@
 // test-db.js
-import { mysql, sqlite } from "./database.js";
+import { mysql, sqlite, ensureMySQLDatabase, SQLITE_PATH } from "./database.js";
 
-const check = async (name, conn) => {
+async function checkConnection(name, conn) {
   try {
     await conn.authenticate();
     console.log(`✅ Connected to ${name}`);
   } catch (e) {
-    console.error(`❌ ${name} connection failed:`, e.message);
-    process.exitCode = 1;
+    console.error(`❌ Failed to connect to ${name}:`, e.message);
   }
-};
+}
 
-await check("MySQL", mysql);
-await check("SQLite", sqlite);
+(async () => {
+  console.log("SQLite file:", SQLITE_PATH);
+  await ensureMySQLDatabase(); // ينشئ قاعدة etqan_daftr لو مش موجودة
 
-process.exit(); // خروج نظيف بعد الاختبار
+  await checkConnection("SQLite", sqlite);
+  await checkConnection("MySQL", mysql);
+
+  process.exit();
+})();
